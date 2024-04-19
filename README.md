@@ -28,7 +28,7 @@ sudo dnf -y install genisoimage virt-install libguestfs-tools-c qemu-img libvirt
 - Ubuntu example:
 
 ```
-sudo apt install -y genisoimage virtinst libguestfs-tools qemu-utils libvirt-clients wget libosinfo-bin
+sudo apt install -y genisoimage virtinst libguestfs-tools qemu-utils libvirt-clients wget libosinfo-bin osinfo-db-tools guestfs-tools net-tools
 ```
 
 If you want to resolve guests by their hostnames, install the `libvirt-nss` package:
@@ -48,6 +48,33 @@ sudo apt install -y libnss-libvirt
 Then, add `libvirt` and `libvirt_guest` to list of **hosts** databases in
 `/etc/nsswitch.conf`.  See [here](https://libvirt.org/nss.html) for more
 information.
+
+### Permissions
+Changes to permissions may be required.
+```
+sudo chmod 644 /boot/*generic
+sudo chmod u+s /usr/lib/qemu/qemu-bridge-helper
+```
+
+### Create a bridge
+Create a file for br0.
+```
+<network connections='1'>
+  <name>br0</name>
+  <forward mode='bridge'/>
+  <bridge name='br0'/>
+</network>
+```
+
+Create br0.
+```
+virsh net-define <br0 file>
+```
+
+### Modify iptables
+```
+sudo iptables -A FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+```
 
 ### Usage
 
